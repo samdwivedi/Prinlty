@@ -1,0 +1,192 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  phone         String?
+  passwordHash  String
+  role          String    @default("STUDENT") // STUDENT, OPERATOR, ADMIN
+  avatar        String?
+  isVerified    Boolean   @default(false)
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  shop          Shop?     @relation("ShopOperator")
+  printJobs     PrintJob[]
+  notifications Notification[]
+  activityLogs  ActivityLog[]
+  passwordResets PasswordReset[]
+
+  @@index([email])
+  @@index([role])
+}
+
+model Shop {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  address     String
+  phone       String
+  email       String?
+  logoUrl     String?
+  isActive    Boolean   @default(true)
+  operatorId  String    @unique
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  operator    User      @relation("ShopOperator", fields: [operatorId], references: [id])
+  printers    Printer[]
+  printJobs   PrintJob[]
+
+  @@index([operatorId])
+}
+
+model Printer {
+  id          String        @id @default(cuid())
+  name        String
+  model       String?
+  shopId      String
+  status      String        @default("ONLINE") // ONLINE, OFFLINE, BUSY, MAINTENANCE
+  isColorCapable Boolean    @default(false)
+  isDuplexCapable Boolean   @default(true)
+  jobsCompleted Int         @default(0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  shop        Shop          @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  printJobs   PrintJob[]
+
+  @@index([shopId])
+}
+
+model Document {
+  id          String    @id @default(cuid())
+  fileName    String
+  originalName String
+  fileSize    Int
+  pageCount   Int       @default(0)
+  mimeType    String    @default("application/pdf")
+  storagePath String
+  storageKey  String    @unique
+  uploadedById String
+  isDeleted   Boolean   @default(false)
+  deletedAt   DateTime?
+  createdAt   DateTime  @default(now())
+
+  printJobs   PrintJob[]
+
+  @@index([uploadedById])
+  @@index([storageKey])
+}
+
+model PrintJob {
+  id            String     @id @default(cuid())
+  jobNumber     String     @unique @default(cuid())
+  userId        String
+  shopId        String
+  documentId    String
+  printerId     String?
+  
+  copies        Int        @default(1)
+  color         String     @default("BLACK_WHITE") // BLACK_WHITE, COLOR
+  sides         String     @default("SINGLE") // SINGLE, DOUBLE
+  pageRange     String?
+  paperSize     String     @default("A4")
+  
+  status        String     @default("PENDING") // PENDING, QUEUED, PROCESSING, COMPLETED, CANCELLED, FAILED
+  
+  qrToken       String     @unique @default(cuid())
+  qrExpiresAt   DateTime
+  
+  totalPages    Int        @default(0)
+  estimatedCost Float      @default(0)
+  actualCost    Float?
+  
+  notes         String?
+  operatorNotes String?
+  
+  startedAt     DateTime?
+  completedAt   DateTime?
+  cancelledAt   DateTime?
+  
+  autoDeleteAt  DateTime
+  isDeleted     Boolean    @default(false)
+  deletedAt     DateTime?
+  
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  user          User       @relation(fields: [userId], references: [id])
+  shop          Shop       @relation(fields: [shopId], references: [id])
+  document      Document   @relation(fields: [documentId], references: [id])
+  printer       Printer?   @relation(fields: [printerId], references: [id])
+  notifications Notification[]
+  activityLogs  ActivityLog[]
+
+  @@index([userId])
+  @@index([shopId])
+  @@index([status])
+  @@index([qrToken])
+  @@index([jobNumber])
+  @@index([createdAt])
+}
+
+model Notification {
+  id          String    @id @default(cuid())
+  userId      String
+  printJobId  String?
+  title       String
+  message     String
+  type        String    @default("info")
+  isRead      Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  printJob    PrintJob? @relation(fields: [printJobId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([isRead])
+}
+
+model ActivityLog {
+  id          String    @id @default(cuid())
+  userId      String?
+  printJobId  String?
+  action      String
+  details     Json?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime  @default(now())
+
+  user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  printJob    PrintJob? @relation(fields: [printJobId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([printJobId])
+  @@index([createdAt])
+}
+
+model PasswordReset {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+}
