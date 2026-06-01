@@ -1,0 +1,76 @@
+name: Printly CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  # 🚀 Job 1: Build & Lint Testing (Continuous Integration)
+  test-and-build:
+    name: Build & Code Quality Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Project Dependencies
+        run: npm ci
+
+      - name: Generate Prisma Schema Client
+        run: npx prisma generate
+
+      - name: Validate Code Linting (ESLint)
+        run: npm run lint
+        continue-on-error: true # Let compilation continue for demo logs
+
+      - name: Compile Next.js Application (Build Verification)
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+          DATABASE_URL: "file:./dev.db"
+          JWT_SECRET: "workflow-dummy-jwt-secret-key-1234567890"
+
+  # 🐳 Job 2: Multi-stage Docker Image Construction (Continuous Deployment)
+  docker-validation:
+    name: Docker Image Verification
+    runs-on: ubuntu-latest
+    needs: test-and-build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU (Multi-platform emulation)
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Optional: Uncomment if pushing to Docker Hub using Repository Secrets
+      # - name: Authenticate to Docker Hub Registry
+      #   uses: docker/login-action@v3
+      #   with:
+      #     username: ${{ secrets.DOCKERHUB_USERNAME }}
+      #     password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Compile and Verify Dockerfile Production Build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false # Set to 'true' once registry authentication is enabled
+          tags: |
+            printly-app:latest
+            printly-app:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
