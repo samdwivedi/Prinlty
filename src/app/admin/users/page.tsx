@@ -54,8 +54,8 @@ export default function AdminUsersPage() {
     onError: () => toast.error("Failed to update user"),
   });
 
-  const users = data?.users || [];
-  const pagination = { total: data?.total || 0, pages: data?.pages || 1 };
+  const users = (data as any)?.users || [];
+  const pagination = { total: (data as any)?.total || 0, pages: (data as any)?.pages || 1 };
 
   const roleColors: Record<string, "info" | "warning" | "danger"> = {
     STUDENT: "info",
