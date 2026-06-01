@@ -48,10 +48,13 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (meData) {
-      setProfileForm({
-        name: meData.name || "",
-        phone: meData.phone || "",
-      });
+      const timer = setTimeout(() => {
+        setProfileForm({
+          name: meData.name || "",
+          phone: meData.phone || "",
+        });
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [meData]);
 
