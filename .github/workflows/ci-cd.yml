@@ -11,6 +11,10 @@ jobs:
   test-and-build:
     name: Build & Code Quality Check
     runs-on: ubuntu-latest
+    env:
+      NEXT_TELEMETRY_DISABLED: 1
+      DATABASE_URL: "file:./dev.db"
+      JWT_SECRET: "workflow-dummy-jwt-secret-key-1234567890"
 
     steps:
       - name: Checkout Code
@@ -34,10 +38,6 @@ jobs:
 
       - name: Compile Next.js Application (Build Verification)
         run: npm run build
-        env:
-          NEXT_TELEMETRY_DISABLED: 1
-          DATABASE_URL: "file:./dev.db"
-          JWT_SECRET: "workflow-dummy-jwt-secret-key-1234567890"
 
   # 🐳 Job 2: Multi-stage Docker Image Construction (Continuous Deployment)
   docker-validation:
