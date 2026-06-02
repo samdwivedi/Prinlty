@@ -31,7 +31,7 @@ export function SecurityWrapper() {
       if (e.key === "PrintScreen") {
         try {
           navigator.clipboard.writeText("Screenshots are disabled on Printly for security reasons.");
-        } catch (_err) {
+        } catch {
           // Ignore failures if clipboard API permission is not granted yet
         }
       }

@@ -16,7 +16,7 @@ interface DailyJobs {
 interface AnalyticsData {
   summary: AnalyticsSummary;
   dailyJobs: DailyJobs[];
-  weeklyData: any[];
+  weeklyData: unknown[];
   statusBreakdown: Record<string, number>;
 }
 

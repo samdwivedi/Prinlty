@@ -17,21 +17,21 @@ class Logger {
     return `${colors[level]}[${timestamp}] [${level}] ${message}${colors.RESET}`;
   }
 
-  info(message: string, details?: any) {
+  info(message: string, details?: unknown) {
     console.log(this.formatMessage("INFO", message));
     if (details) {
       console.log(JSON.stringify(details, null, 2));
     }
   }
 
-  warn(message: string, details?: any) {
+  warn(message: string, details?: unknown) {
     console.warn(this.formatMessage("WARN", message));
     if (details) {
       console.warn(JSON.stringify(details, null, 2));
     }
   }
 
-  error(message: string, error?: any, details?: any) {
+  error(message: string, error?: unknown, details?: unknown) {
     console.error(this.formatMessage("ERROR", message));
     if (error) {
       console.error(error);
@@ -48,7 +48,7 @@ class Logger {
     req: NextRequest,
     userId: string | null,
     action: string,
-    details?: any,
+    details?: unknown,
     printJobId?: string
   ) {
     const ipAddress = req.headers.get("x-forwarded-for") || "unknown";

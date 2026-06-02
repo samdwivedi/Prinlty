@@ -16,8 +16,6 @@ import {
   MapPin,
   Phone,
   Printer,
-  CheckCircle,
-  XCircle,
 } from "lucide-react";
 
 export default function AdminShopsPage() {

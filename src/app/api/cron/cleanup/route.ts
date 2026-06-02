@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { deleteFile } from "@/lib/storage";
 import { logger } from "@/lib/logger";
@@ -6,7 +6,7 @@ import { readdir } from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const now = new Date();
     logger.info(`Starting automated system cleanup task at ${now.toISOString()}`);

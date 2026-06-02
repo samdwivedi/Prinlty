@@ -1,8 +1,7 @@
-import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { apiError, apiResponse } from "@/lib/api";
 
-export async function GET(_req: NextRequest) {
+export async function GET() {
   try {
     const shops = await prisma.shop.findMany({
       where: { isActive: true },

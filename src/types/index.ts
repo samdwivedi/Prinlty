@@ -108,7 +108,7 @@ export interface ActivityLog {
   userId?: string | null;
   printJobId?: string | null;
   action: string;
-  details?: Record<string, any> | null;
+  details?: Record<string, unknown> | null;
   ipAddress?: string | null;
   userAgent?: string | null;
   createdAt: string;
