@@ -78,9 +78,10 @@ export async function PATCH(
     if (status === "COMPLETED") {
       updateData.completedAt = new Date();
       // Update printer job count
-      if (job.printerId) {
+      const finalPrinterId = (printerId || job.printerId) as string | null | undefined;
+      if (finalPrinterId) {
         await prisma.printer.update({
-          where: { id: job.printerId },
+          where: { id: finalPrinterId },
           data: { jobsCompleted: { increment: 1 } },
         });
       }

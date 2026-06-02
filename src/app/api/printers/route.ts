@@ -48,6 +48,15 @@ export async function POST(req: NextRequest) {
 
     if (!name || !shopId) return apiError("Name and shop are required", 400);
 
+    if (user.role === "OPERATOR") {
+      const shop = await prisma.shop.findUnique({
+        where: { operatorId: user.userId },
+      });
+      if (!shop || shop.id !== shopId) {
+        return apiError("Forbidden: You cannot register a printer for another shop", 403);
+      }
+    }
+
     const printer = await prisma.printer.create({
       data: {
         name,

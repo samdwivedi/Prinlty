@@ -1,8 +1,11 @@
+import { randomBytes } from "crypto";
+
 export function generateQRToken(): string {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   let token = "";
+  const bytes = randomBytes(8);
   for (let i = 0; i < 8; i++) {
-    token += chars.charAt(Math.floor(Math.random() * chars.length));
+    token += chars.charAt(bytes[i] % chars.length);
   }
   return token;
 }
@@ -47,15 +50,59 @@ export function parsePageRange(range: string, totalPages: number): number {
     const trimmed = part.trim();
     if (trimmed.includes("-")) {
       const [start, end] = trimmed.split("-").map(Number);
-      if (!isNaN(start) && !isNaN(end)) {
-        count += Math.abs(end - start) + 1;
+      if (!isNaN(start) && !isNaN(end) && start > 0 && end > 0) {
+        const s = Math.min(start, end);
+        const e = Math.min(Math.max(start, end), totalPages);
+        if (s <= totalPages) {
+          count += (e - s) + 1;
+        }
       }
     } else {
       const num = parseInt(trimmed);
-      if (!isNaN(num)) count += 1;
+      if (!isNaN(num) && num > 0 && num <= totalPages) {
+        count += 1;
+      }
     }
   }
-  return count || totalPages;
+  return count > 0 ? Math.min(count, totalPages) : totalPages;
+}
+
+export function getPdfPageCount(buffer: Buffer): number {
+  const content = buffer.toString("binary");
+  
+  // 1. Try to find /Type /Pages /Count X
+  const pagesMatches = Array.from(content.matchAll(/\/Type\s*\/Pages\s*[^>]*\/Count\s+(\d+)/g));
+  if (pagesMatches.length > 0) {
+    const lastMatch = pagesMatches[pagesMatches.length - 1];
+    const count = parseInt(lastMatch[1], 10);
+    if (!isNaN(count) && count > 0) {
+      return count;
+    }
+  }
+
+  // 2. Try to find any /Count X
+  const countMatches = Array.from(content.matchAll(/\/Count\s+(\d+)/g));
+  if (countMatches.length > 0) {
+    let maxCount = 0;
+    for (const match of countMatches) {
+      const val = parseInt(match[1], 10);
+      if (!isNaN(val) && val > maxCount && val < 10000) {
+        maxCount = val;
+      }
+    }
+    if (maxCount > 0) {
+      return maxCount;
+    }
+  }
+
+  // 3. Try to count /Type /Page occurrences
+  const pageMatches = content.match(/\/Type\s*\/Page\b/g);
+  if (pageMatches && pageMatches.length > 0) {
+    return pageMatches.length;
+  }
+
+  // Default fallback
+  return 1;
 }
 
 export function formatJobStatus(status: string): string {

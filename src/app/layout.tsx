@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { Toaster } from "react-hot-toast";
+import { SecurityWrapper } from "@/components/security-wrapper";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -24,6 +25,7 @@ export const metadata: Metadata = {
     title: "Printly — Secure Print Management",
     description: "Modern print management for colleges and print centers",
     type: "website",
+    siteName: "Printly",
   },
 };
 
@@ -41,6 +43,7 @@ export default function RootLayout({
     <html lang="en" className={inter.variable} data-scroll-behavior="smooth">
       <body className={`${inter.className} antialiased bg-white text-gray-900`}>
         <Providers>
+          <SecurityWrapper />
           {children}
           <Toaster
             position="top-right"

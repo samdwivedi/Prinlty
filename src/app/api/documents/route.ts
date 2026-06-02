@@ -4,6 +4,8 @@ import { saveFile } from "@/lib/storage";
 import { getUserFromRequest } from "@/lib/auth";
 import { apiError, apiResponse } from "@/lib/api";
 import { logger } from "@/lib/logger";
+import { readFile } from "fs/promises";
+import { getPdfPageCount } from "@/lib/utils";
 
 export async function POST(req: NextRequest) {
   try {
@@ -19,6 +21,16 @@ export async function POST(req: NextRequest) {
 
     const saved = await saveFile(file);
 
+    // Read saved PDF buffer to extract real page count
+    let pageCount = 0;
+    try {
+      const fileBuffer = await readFile(saved.storagePath);
+      pageCount = getPdfPageCount(fileBuffer);
+    } catch (e) {
+      logger.error("Failed to parse PDF page count, fallback to 1", e);
+      pageCount = 1;
+    }
+
     const document = await prisma.document.create({
       data: {
         fileName: saved.fileName,
@@ -28,7 +40,7 @@ export async function POST(req: NextRequest) {
         storagePath: saved.storagePath,
         storageKey: saved.storageKey,
         uploadedById: user.userId,
-        pageCount: 0,
+        pageCount,
       },
     });
 
@@ -42,6 +54,7 @@ export async function POST(req: NextRequest) {
       pageCount: document.pageCount,
       createdAt: document.createdAt,
     }, 201);
+  } catch (error) {
     const message = error instanceof Error ? error.message : "Upload failed";
     logger.error("Upload error in API route", error);
     return apiError(message, 400);

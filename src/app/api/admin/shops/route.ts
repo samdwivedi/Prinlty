@@ -39,6 +39,25 @@ export async function POST(req: NextRequest) {
       return apiError("Name, address, phone, and operator are required", 400);
     }
 
+    // Validate operator exists and has correct role
+    const operatorUser = await prisma.user.findUnique({
+      where: { id: operatorId },
+    });
+    if (!operatorUser) {
+      return apiError("Operator user not found", 400);
+    }
+    if (operatorUser.role !== "OPERATOR") {
+      return apiError("Selected user does not have the OPERATOR role", 400);
+    }
+
+    // Validate operator is not already managing a shop
+    const existingShop = await prisma.shop.findUnique({
+      where: { operatorId },
+    });
+    if (existingShop) {
+      return apiError("This operator is already assigned to another shop", 400);
+    }
+
     const shop = await prisma.shop.create({
       data: { name, description, address, phone, email, operatorId },
       include: { operator: { select: { name: true, email: true } } },

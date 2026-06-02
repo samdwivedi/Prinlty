@@ -29,7 +29,7 @@ export async function PATCH(req: NextRequest) {
     const { id } = body;
 
     if (id) {
-      await prisma.notification.update({
+      await prisma.notification.updateMany({
         where: { id, userId: user.userId },
         data: { isRead: true },
       });
