@@ -238,7 +238,7 @@ export default function AnalyticsPage() {
                 <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} tickLine={false} axisLine={false} />
                 <Tooltip
                   contentStyle={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: "12px", fontSize: "13px" }}
-                  formatter={(value: number, name: string) => [`₹${value}`, name]}
+                  formatter={(value) => [`₹${value}`, "Revenue"]}
                 />
                 <Area
                   type="monotone"
