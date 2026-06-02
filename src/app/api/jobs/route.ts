@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getUserFromRequest } from "@/lib/auth";
 import { apiError, apiResponse } from "@/lib/api";
+import { logger } from "@/lib/logger";
 import { calculatePrintCost, generateJobNumber, getQRExpiry, getAutoDeleteDate } from "@/lib/utils";
 
 export async function GET(req: NextRequest) {
@@ -61,7 +62,7 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Get jobs error:", error);
+    logger.error("Get jobs error in API route", error);
     return apiError("Internal server error", 500);
   }
 }
@@ -140,18 +141,11 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    await prisma.activityLog.create({
-      data: {
-        userId: user.userId,
-        printJobId: job.id,
-        action: "JOB_CREATED",
-        details: { jobNumber: job.jobNumber, documentId, shopId },
-      },
-    });
+    await logger.activity(req, user.userId, "JOB_CREATED", { jobNumber: job.jobNumber, documentId, shopId }, job.id);
 
     return apiResponse(job, 201);
   } catch (error) {
-    console.error("Create job error:", error);
+    logger.error("Create job error in API route", error);
     return apiError("Internal server error", 500);
   }
 }

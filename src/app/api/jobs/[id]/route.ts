@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getUserFromRequest } from "@/lib/auth";
 import { apiError, apiResponse } from "@/lib/api";
+import { logger } from "@/lib/logger";
 
 export async function GET(
   req: NextRequest,
@@ -32,7 +33,7 @@ export async function GET(
 
     return apiResponse(job);
   } catch (error) {
-    console.error("Get job error:", error);
+    logger.error("Get job details error in API route", error);
     return apiError("Internal server error", 500);
   }
 }
@@ -115,18 +116,11 @@ export async function PATCH(
       });
     }
 
-    await prisma.activityLog.create({
-      data: {
-        userId: user.userId,
-        printJobId: job.id,
-        action: `JOB_STATUS_CHANGED_TO_${status}`,
-        details: { jobId: id, previousStatus: job.status, newStatus: status },
-      },
-    });
+    await logger.activity(req, user.userId, `JOB_STATUS_CHANGED_TO_${status}`, { jobId: id, previousStatus: job.status, newStatus: status }, job.id);
 
     return apiResponse(updated);
   } catch (error) {
-    console.error("Update job error:", error);
+    logger.error("Update job status error in API route", error);
     return apiError("Internal server error", 500);
   }
 }

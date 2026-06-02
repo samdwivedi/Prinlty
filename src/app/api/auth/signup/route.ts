@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { signToken } from "@/lib/auth";
 import { apiError } from "@/lib/api";
+import { logger } from "@/lib/logger";
 
 export async function POST(req: NextRequest) {
   try {
@@ -55,13 +56,7 @@ export async function POST(req: NextRequest) {
       name: user.name,
     });
 
-    await prisma.activityLog.create({
-      data: {
-        userId: user.id,
-        action: "USER_REGISTERED",
-        ipAddress: req.headers.get("x-forwarded-for") || "unknown",
-      },
-    });
+    await logger.activity(req, user.id, "USER_REGISTERED");
 
     const response = NextResponse.json({
       success: true,
@@ -86,7 +81,7 @@ export async function POST(req: NextRequest) {
 
     return response;
   } catch (error) {
-    console.error("Signup error:", error);
+    logger.error("Signup error in API route", error);
     return apiError("Internal server error", 500);
   }
 }

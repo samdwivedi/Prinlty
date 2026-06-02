@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { saveFile } from "@/lib/storage";
 import { getUserFromRequest } from "@/lib/auth";
 import { apiError, apiResponse } from "@/lib/api";
+import { logger } from "@/lib/logger";
 
 export async function POST(req: NextRequest) {
   try {
@@ -31,13 +32,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    await prisma.activityLog.create({
-      data: {
-        userId: user.userId,
-        action: "DOCUMENT_UPLOADED",
-        details: { documentId: document.id, fileName: document.originalName },
-      },
-    });
+    await logger.activity(req, user.userId, "DOCUMENT_UPLOADED", { documentId: document.id, fileName: document.originalName });
 
     return apiResponse({
       id: document.id,
@@ -47,9 +42,8 @@ export async function POST(req: NextRequest) {
       pageCount: document.pageCount,
       createdAt: document.createdAt,
     }, 201);
-  } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Upload failed";
-    console.error("Upload error:", error);
+    logger.error("Upload error in API route", error);
     return apiError(message, 400);
   }
 }
@@ -70,7 +64,7 @@ export async function GET(req: NextRequest) {
 
     return apiResponse(documents);
   } catch (error) {
-    console.error("Get documents error:", error);
+    logger.error("Get documents error in API route", error);
     return apiError("Internal server error", 500);
   }
 }
