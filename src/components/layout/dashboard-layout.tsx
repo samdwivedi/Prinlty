@@ -15,7 +15,7 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children, requiredRole }: DashboardLayoutProps) {
   const router = useRouter();
-  const { user, setUser, token } = useAuthStore();
+  const { setUser } = useAuthStore();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const { data, isLoading, error } = useQuery({

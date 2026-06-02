@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { use } from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
-import { DashboardHeader } from "@/components/layout/sidebar";
 import { StatusBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";

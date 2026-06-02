@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
     });
 
     return apiResponse(notifications);
-  } catch (error) {
+  } catch (_error) {
     return apiError("Internal server error", 500);
   }
 }
@@ -42,7 +42,7 @@ export async function PATCH(req: NextRequest) {
     }
 
     return apiResponse({ message: "Marked as read" });
-  } catch (error) {
+  } catch (_error) {
     return apiError("Internal server error", 500);
   }
 }

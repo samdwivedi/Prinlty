@@ -14,7 +14,6 @@ import {
   CheckCircle,
   Star,
   Users,
-  FileText,
   ChevronRight,
   Play,
   Check,
@@ -25,6 +24,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 const features = [
   {
@@ -227,10 +227,13 @@ export default function HomePage() {
             {/* Soft decorative glow behind image */}
             <div className="absolute w-[80%] h-[80%] bg-gradient-to-tr from-indigo-200 to-sky-200 blur-3xl opacity-35 rounded-full -z-10" />
             <div className="premium-card p-2 bg-white/70 backdrop-blur-md rounded-2xl shadow-xl hover:-translate-y-1 transition-transform max-w-md sm:max-w-lg border border-slate-100">
-              <img
+              <Image
                 src="/hero_illustration.png"
                 alt="Printly Smart Printing Platform Illustration"
+                width={600}
+                height={400}
                 className="rounded-xl w-full object-cover shadow-sm"
+                priority
               />
             </div>
           </div>

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { useAuthStore } from "@/stores/auth";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import toast from "react-hot-toast";
 import {
@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 
 export default function SettingsPage() {
-  const { user, setUser } = useAuthStore();
+  const { user } = useAuthStore();
   const [activeSection, setActiveSection] = useState("profile");
   const [showCurrentPass, setShowCurrentPass] = useState(false);
   const [showNewPass, setShowNewPass] = useState(false);

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { readFile } from "fs/promises";
-import path from "path";
 import { prisma } from "@/lib/prisma";
 import { getUserFromRequest } from "@/lib/auth";
 import { apiError } from "@/lib/api";

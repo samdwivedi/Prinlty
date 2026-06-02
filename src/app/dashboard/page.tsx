@@ -19,7 +19,7 @@ import {
   Printer,
 } from "lucide-react";
 import Link from "next/link";
-import { formatDate, formatRelativeTime } from "@/lib/cn";
+import { formatRelativeTime } from "@/lib/cn";
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
